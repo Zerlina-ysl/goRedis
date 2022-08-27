@@ -2,10 +2,10 @@ package parser
 
 import (
 	"bytes"
-	"github.com/hdt3213/godis/interface/redis"
-	"github.com/hdt3213/godis/lib/utils"
-	"github.com/hdt3213/godis/redis/protocol"
 	"io"
+	"personalCode/goRedis/interface/redis"
+	"personalCode/goRedis/lib/utils"
+	"personalCode/goRedis/redis/protocol"
 	"testing"
 )
 

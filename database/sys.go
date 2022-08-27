@@ -1,9 +1,9 @@
 package database
 
 import (
-	"github.com/hdt3213/godis/config"
-	"github.com/hdt3213/godis/interface/redis"
-	"github.com/hdt3213/godis/redis/protocol"
+	"personalCode/goRedis/config"
+	"personalCode/goRedis/interface/redis"
+	"personalCode/goRedis/redis/protocol"
 )
 
 // Ping the server

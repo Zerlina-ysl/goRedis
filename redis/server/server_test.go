@@ -2,8 +2,8 @@ package server
 
 import (
 	"bufio"
-	"github.com/hdt3213/godis/tcp"
 	"net"
+	"personalCode/goRedis/tcp"
 	"testing"
 	"time"
 )

@@ -1,14 +1,14 @@
 package aof
 
 import (
-	"github.com/hdt3213/godis/config"
-	"github.com/hdt3213/godis/interface/database"
-	"github.com/hdt3213/godis/lib/logger"
-	"github.com/hdt3213/godis/lib/utils"
-	"github.com/hdt3213/godis/redis/protocol"
 	"io"
 	"io/ioutil"
 	"os"
+	"personalCode/goRedis/config"
+	"personalCode/goRedis/interface/database"
+	"personalCode/goRedis/lib/logger"
+	"personalCode/goRedis/lib/utils"
+	"personalCode/goRedis/redis/protocol"
 	"strconv"
 	"time"
 )

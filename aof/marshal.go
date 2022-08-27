@@ -1,12 +1,12 @@
 package aof
 
 import (
-	"github.com/hdt3213/godis/datastruct/dict"
-	List "github.com/hdt3213/godis/datastruct/list"
-	"github.com/hdt3213/godis/datastruct/set"
-	SortedSet "github.com/hdt3213/godis/datastruct/sortedset"
-	"github.com/hdt3213/godis/interface/database"
-	"github.com/hdt3213/godis/redis/protocol"
+	"personalCode/goRedis/datastruct/dict"
+	"personalCode/goRedis/datastruct/list"
+	"personalCode/goRedis/datastruct/set"
+	"personalCode/goRedis/datastruct/sortedset"
+	"personalCode/goRedis/interface/database"
+	"personalCode/goRedis/redis/protocol"
 	"strconv"
 	"time"
 )
@@ -20,13 +20,13 @@ func EntityToCmd(key string, entity *database.DataEntity) *protocol.MultiBulkRep
 	switch val := entity.Data.(type) {
 	case []byte:
 		cmd = stringToCmd(key, val)
-	case List.List:
+	case list.List:
 		cmd = listToCmd(key, val)
 	case *set.Set:
 		cmd = setToCmd(key, val)
 	case dict.Dict:
 		cmd = hashToCmd(key, val)
-	case *SortedSet.SortedSet:
+	case *sortedset.SortedSet:
 		cmd = zSetToCmd(key, val)
 	}
 	return cmd
@@ -44,7 +44,7 @@ func stringToCmd(key string, bytes []byte) *protocol.MultiBulkReply {
 
 var rPushAllCmd = []byte("RPUSH")
 
-func listToCmd(key string, list List.List) *protocol.MultiBulkReply {
+func listToCmd(key string, list list.List) *protocol.MultiBulkReply {
 	args := make([][]byte, 2+list.Len())
 	args[0] = rPushAllCmd
 	args[1] = []byte(key)
@@ -90,12 +90,12 @@ func hashToCmd(key string, hash dict.Dict) *protocol.MultiBulkReply {
 
 var zAddCmd = []byte("ZADD")
 
-func zSetToCmd(key string, zset *SortedSet.SortedSet) *protocol.MultiBulkReply {
+func zSetToCmd(key string, zset *sortedset.SortedSet) *protocol.MultiBulkReply {
 	args := make([][]byte, 2+zset.Len()*2)
 	args[0] = zAddCmd
 	args[1] = []byte(key)
 	i := 0
-	zset.ForEach(int64(0), int64(zset.Len()), true, func(element *SortedSet.Element) bool {
+	zset.ForEach(int64(0), int64(zset.Len()), true, func(element *sortedset.Element) bool {
 		value := strconv.FormatFloat(element.Score, 'f', -1, 64)
 		args[2+i*2] = []byte(value)
 		args[3+i*2] = []byte(element.Member)

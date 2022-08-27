@@ -1,6 +1,7 @@
 package database
 
 import (
+	"personalCode/goRedis/datastruct/sortedset"
 	"personalCode/goRedis/interface/database"
 	"personalCode/goRedis/interface/redis"
 	"personalCode/goRedis/lib/utils"
@@ -9,26 +10,26 @@ import (
 	"strings"
 )
 
-func (db *DB) getAsSortedSet(key string) (*SortedSet.SortedSet, protocol.ErrorReply) {
+func (db *DB) getAsSortedSet(key string) (*sortedset.SortedSet, protocol.ErrorReply) {
 	entity, exists := db.GetEntity(key)
 	if !exists {
 		return nil, nil
 	}
-	sortedSet, ok := entity.Data.(*SortedSet.SortedSet)
+	sortedSet, ok := entity.Data.(*sortedset.SortedSet)
 	if !ok {
 		return nil, &protocol.WrongTypeErrReply{}
 	}
 	return sortedSet, nil
 }
 
-func (db *DB) getOrInitSortedSet(key string) (sortedSet *SortedSet.SortedSet, inited bool, errReply protocol.ErrorReply) {
+func (db *DB) getOrInitSortedSet(key string) (sortedSet *sortedset.SortedSet, inited bool, errReply protocol.ErrorReply) {
 	sortedSet, errReply = db.getAsSortedSet(key)
 	if errReply != nil {
 		return nil, false, errReply
 	}
 	inited = false
 	if sortedSet == nil {
-		sortedSet = SortedSet.Make()
+		sortedSet = sortedset.Make()
 		db.PutEntity(key, &database.DataEntity{
 			Data: sortedSet,
 		})
@@ -44,7 +45,7 @@ func execZAdd(db *DB, args [][]byte) redis.Reply {
 	}
 	key := string(args[0])
 	size := (len(args) - 1) / 2
-	elements := make([]*SortedSet.Element, size)
+	elements := make([]*sortedset.Element, size)
 	for i := 0; i < size; i++ {
 		scoreValue := args[2*i+1]
 		member := string(args[2*i+2])
@@ -52,7 +53,7 @@ func execZAdd(db *DB, args [][]byte) redis.Reply {
 		if err != nil {
 			return protocol.MakeErrReply("ERR value is not a valid float")
 		}
-		elements[i] = &SortedSet.Element{
+		elements[i] = &sortedset.Element{
 			Member: member,
 			Score:  score,
 		}
@@ -278,12 +279,12 @@ func range0(db *DB, key string, start int64, stop int64, withScores bool, desc b
 func execZCount(db *DB, args [][]byte) redis.Reply {
 	key := string(args[0])
 
-	min, err := SortedSet.ParseScoreBorder(string(args[1]))
+	min, err := sortedset.ParseScoreBorder(string(args[1]))
 	if err != nil {
 		return protocol.MakeErrReply(err.Error())
 	}
 
-	max, err := SortedSet.ParseScoreBorder(string(args[2]))
+	max, err := sortedset.ParseScoreBorder(string(args[2]))
 	if err != nil {
 		return protocol.MakeErrReply(err.Error())
 	}
@@ -303,7 +304,7 @@ func execZCount(db *DB, args [][]byte) redis.Reply {
 /*
  * param limit: limit < 0 means no limit
  */
-func rangeByScore0(db *DB, key string, min *SortedSet.ScoreBorder, max *SortedSet.ScoreBorder, offset int64, limit int64, withScores bool, desc bool) redis.Reply {
+func rangeByScore0(db *DB, key string, min *sortedset.ScoreBorder, max *sortedset.ScoreBorder, offset int64, limit int64, withScores bool, desc bool) redis.Reply {
 	// get data
 	sortedSet, errReply := db.getAsSortedSet(key)
 	if errReply != nil {
@@ -342,12 +343,12 @@ func execZRangeByScore(db *DB, args [][]byte) redis.Reply {
 	}
 	key := string(args[0])
 
-	min, err := SortedSet.ParseScoreBorder(string(args[1]))
+	min, err := sortedset.ParseScoreBorder(string(args[1]))
 	if err != nil {
 		return protocol.MakeErrReply(err.Error())
 	}
 
-	max, err := SortedSet.ParseScoreBorder(string(args[2]))
+	max, err := sortedset.ParseScoreBorder(string(args[2]))
 	if err != nil {
 		return protocol.MakeErrReply(err.Error())
 	}
@@ -389,12 +390,12 @@ func execZRevRangeByScore(db *DB, args [][]byte) redis.Reply {
 	}
 	key := string(args[0])
 
-	min, err := SortedSet.ParseScoreBorder(string(args[2]))
+	min, err := sortedset.ParseScoreBorder(string(args[2]))
 	if err != nil {
 		return protocol.MakeErrReply(err.Error())
 	}
 
-	max, err := SortedSet.ParseScoreBorder(string(args[1]))
+	max, err := sortedset.ParseScoreBorder(string(args[1]))
 	if err != nil {
 		return protocol.MakeErrReply(err.Error())
 	}
@@ -436,12 +437,12 @@ func execZRemRangeByScore(db *DB, args [][]byte) redis.Reply {
 	}
 	key := string(args[0])
 
-	min, err := SortedSet.ParseScoreBorder(string(args[1]))
+	min, err := sortedset.ParseScoreBorder(string(args[1]))
 	if err != nil {
 		return protocol.MakeErrReply(err.Error())
 	}
 
-	max, err := SortedSet.ParseScoreBorder(string(args[2]))
+	max, err := sortedset.ParseScoreBorder(string(args[2]))
 	if err != nil {
 		return protocol.MakeErrReply(err.Error())
 	}

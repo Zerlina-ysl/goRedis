@@ -94,7 +94,3 @@
     - zrem
     - zremrangebyscore
     - zremrangebyrank
-- Pub / Sub
-    - publish
-    - subscribe
-    - unsubscribe

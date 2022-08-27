@@ -6,17 +6,16 @@ package server
 
 import (
 	"context"
-	"github.com/hdt3213/godis/cluster"
-	"github.com/hdt3213/godis/config"
-	database2 "github.com/hdt3213/godis/database"
-	"github.com/hdt3213/godis/interface/database"
-	"github.com/hdt3213/godis/lib/logger"
-	"github.com/hdt3213/godis/lib/sync/atomic"
-	"github.com/hdt3213/godis/redis/connection"
-	"github.com/hdt3213/godis/redis/parser"
-	"github.com/hdt3213/godis/redis/protocol"
 	"io"
 	"net"
+	_ "personalCode/goRedis/config"
+	database2 "personalCode/goRedis/database"
+	"personalCode/goRedis/interface/database"
+	"personalCode/goRedis/lib/logger"
+	"personalCode/goRedis/lib/sync/atomic"
+	"personalCode/goRedis/redis/connection"
+	"personalCode/goRedis/redis/parser"
+	"personalCode/goRedis/redis/protocol"
 	"strings"
 	"sync"
 )
@@ -35,12 +34,8 @@ type Handler struct {
 // MakeHandler creates a Handler instance
 func MakeHandler() *Handler {
 	var db database.DB
-	if config.Properties.Self != "" &&
-		len(config.Properties.Peers) > 0 {
-		db = cluster.MakeCluster()
-	} else {
-		db = database2.NewStandaloneServer()
-	}
+	db = database2.NewStandaloneServer()
+
 	return &Handler{
 		db: db,
 	}

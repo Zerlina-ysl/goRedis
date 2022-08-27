@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/hdt3213/godis/config"
-	"github.com/hdt3213/godis/lib/logger"
-	RedisServer "github.com/hdt3213/godis/redis/server"
-	"github.com/hdt3213/godis/tcp"
 	"os"
+	"personalCode/goRedis/config"
+	"personalCode/goRedis/lib/logger"
+	"personalCode/goRedis/redis/server"
+	"personalCode/goRedis/tcp"
 )
 
 var banner = `
@@ -51,7 +51,7 @@ func main() {
 
 	err := tcp.ListenAndServeWithSignal(&tcp.Config{
 		Address: fmt.Sprintf("%s:%d", config.Properties.Bind, config.Properties.Port),
-	}, RedisServer.MakeHandler())
+	}, server.MakeHandler())
 	if err != nil {
 		logger.Error(err)
 	}
