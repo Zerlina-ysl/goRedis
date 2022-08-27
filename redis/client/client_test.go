@@ -2,10 +2,10 @@ package client
 
 import (
 	"bytes"
-	"github.com/hdt3213/godis/lib/logger"
-	"github.com/hdt3213/godis/lib/utils"
-	"github.com/hdt3213/godis/redis/protocol"
-	"github.com/hdt3213/godis/redis/protocol/asserts"
+	"personalCode/goRedis/lib/logger"
+	"personalCode/goRedis/lib/utils"
+	"personalCode/goRedis/redis/protocol"
+	"personalCode/goRedis/redis/protocol/asserts"
 	"strconv"
 	"testing"
 	"time"

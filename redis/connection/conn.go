@@ -2,8 +2,8 @@ package connection
 
 import (
 	"bytes"
-	"github.com/hdt3213/godis/lib/sync/wait"
 	"net"
+	"personalCode/goRedis/lib/sync/wait"
 	"sync"
 	"time"
 )

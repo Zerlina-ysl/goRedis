@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/hdt3213/godis/interface/redis"
-	"github.com/hdt3213/godis/redis/protocol"
+	"personalCode/goRedis/interface/redis"
+	"personalCode/goRedis/redis/protocol"
 	"strings"
 )
 

@@ -79,7 +79,7 @@ func (set *Set) Intersect(another *Set) *Set {
 	return result
 }
 
-// Union adds two sets
+// Union 并集
 func (set *Set) Union(another *Set) *Set {
 	if set == nil {
 		panic("set is nil")
@@ -96,7 +96,7 @@ func (set *Set) Union(another *Set) *Set {
 	return result
 }
 
-// Diff subtracts two sets
+// Diff 集合相减
 func (set *Set) Diff(another *Set) *Set {
 	if set == nil {
 		panic("set is nil")

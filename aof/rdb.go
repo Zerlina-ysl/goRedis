@@ -1,17 +1,17 @@
 package aof
 
 import (
-	"github.com/hdt3213/godis/config"
-	"github.com/hdt3213/godis/datastruct/dict"
-	List "github.com/hdt3213/godis/datastruct/list"
-	"github.com/hdt3213/godis/datastruct/set"
-	SortedSet "github.com/hdt3213/godis/datastruct/sortedset"
-	"github.com/hdt3213/godis/interface/database"
-	"github.com/hdt3213/godis/lib/logger"
 	rdb "github.com/hdt3213/rdb/encoder"
 	"github.com/hdt3213/rdb/model"
 	"io/ioutil"
 	"os"
+	"personalCode/goRedis/config"
+	"personalCode/goRedis/datastruct/dict"
+	List "personalCode/goRedis/datastruct/list"
+	"personalCode/goRedis/datastruct/set"
+	SortedSet "personalCode/goRedis/datastruct/sortedset"
+	"personalCode/goRedis/interface/database"
+	"personalCode/goRedis/lib/logger"
 	"strconv"
 	"time"
 )

@@ -2,9 +2,9 @@ package config
 
 import (
 	"bufio"
-	"github.com/hdt3213/godis/lib/logger"
 	"io"
 	"os"
+	"personalCode/goRedis/lib/logger"
 	"reflect"
 	"strconv"
 	"strings"

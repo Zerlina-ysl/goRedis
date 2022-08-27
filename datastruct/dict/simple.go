@@ -56,7 +56,7 @@ func (dict *SimpleDict) PutIfExists(key string, val interface{}) (result int) {
 	return 0
 }
 
-// Remove removes the key and return the number of deleted key-value
+// Remove 调用map[string]interface的删除方法 如果存在返回1 不存在返回0不报错
 func (dict *SimpleDict) Remove(key string) (result int) {
 	_, existed := dict.m[key]
 	delete(dict.m, key)

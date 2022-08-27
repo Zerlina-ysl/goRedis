@@ -9,10 +9,12 @@ import (
 func TestSetBit(t *testing.T) {
 	// generate distinct rand offsets
 	size := 1000
+	// 偏移量
 	offsets := make([]int64, size)
 	for i := 0; i < size; i++ {
 		offsets[i] = int64(i)
 	}
+	// 洗牌算法 交换i和j的位置
 	rand.Shuffle(size, func(i, j int) {
 		offsets[i], offsets[j] = offsets[j], offsets[i]
 	})

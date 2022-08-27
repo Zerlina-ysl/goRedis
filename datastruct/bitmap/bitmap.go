@@ -14,6 +14,7 @@ func toByteSize(bitSize int64) int64 {
 	return bitSize/8 + 1
 }
 
+// grow 通过offset所占的字节数进行扩容
 func (b *BitMap) grow(bitSize int64) {
 	byteSize := toByteSize(bitSize)
 	gap := byteSize - int64(len(*b))
@@ -42,10 +43,10 @@ func (b *BitMap) SetBit(offset int64, val byte) {
 	mask := byte(1 << bitOffset)
 	b.grow(offset + 1)
 	if val > 0 {
-		// set bit
+		// set 1
 		(*b)[byteIndex] |= mask
 	} else {
-		// clear bit
+		// clear 1
 		(*b)[byteIndex] &^= mask
 	}
 }

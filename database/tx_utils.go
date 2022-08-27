@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/hdt3213/godis/aof"
-	"github.com/hdt3213/godis/lib/utils"
+	"personalCode/goRedis/aof"
+	"personalCode/goRedis/lib/utils"
 	"strconv"
 )
 

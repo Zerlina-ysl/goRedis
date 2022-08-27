@@ -2,15 +2,13 @@ package database
 
 import (
 	"fmt"
-	"github.com/hdt3213/godis/aof"
-	"github.com/hdt3213/godis/config"
-	"github.com/hdt3213/godis/interface/database"
-	"github.com/hdt3213/godis/interface/redis"
-	"github.com/hdt3213/godis/lib/logger"
-	"github.com/hdt3213/godis/lib/utils"
-	"github.com/hdt3213/godis/pubsub"
-	"github.com/hdt3213/godis/redis/connection"
-	"github.com/hdt3213/godis/redis/protocol"
+	"personalCode/goRedis/aof"
+	"personalCode/goRedis/config"
+	"personalCode/goRedis/interface/database"
+	"personalCode/goRedis/interface/redis"
+	"personalCode/goRedis/lib/logger"
+	"personalCode/goRedis/lib/utils"
+	"personalCode/goRedis/redis/protocol"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -22,15 +20,13 @@ import (
 type MultiDB struct {
 	dbSet []*atomic.Value // *DB
 
-	// handle publish/subscribe
-	hub *pubsub.Hub
 	// handle aof persistence
 	aofHandler *aof.Handler
+}
 
-	// store master node address
-	slaveOf     string
-	role        int32
-	replication *replicationStatus
+func (mdb *MultiDB) AfterClientClose(c redis.Connection) {
+	//TODO implement me
+	logger.Info("After Client Close")
 }
 
 // NewStandaloneServer creates a standalone redis server, with multi database and all other funtions
@@ -47,8 +43,6 @@ func NewStandaloneServer() *MultiDB {
 		holder.Store(singleDB)
 		mdb.dbSet[i] = holder
 	}
-	mdb.hub = pubsub.MakeHub()
-	validAof := false
 	if config.Properties.AppendOnly {
 		aofHandler, err := aof.NewAOFHandler(mdb, func() database.EmbedDB {
 			return MakeBasicMultiDB()
@@ -63,15 +57,8 @@ func NewStandaloneServer() *MultiDB {
 				mdb.aofHandler.AddAof(singleDB.index, line)
 			}
 		}
-		validAof = true
 	}
-	if config.Properties.RDBFilename != "" && !validAof {
-		// load rdb
-		loadRdbFile(mdb)
-	}
-	mdb.replication = initReplStatus()
-	mdb.startReplCron()
-	mdb.role = masterRole // The initialization process does not require atomicity
+
 	return mdb
 }
 
@@ -105,52 +92,9 @@ func (mdb *MultiDB) Exec(c redis.Connection, cmdLine [][]byte) (result redis.Rep
 	if !isAuthenticated(c) {
 		return protocol.MakeErrReply("NOAUTH Authentication required")
 	}
-	if cmdName == "slaveof" {
-		if c != nil && c.InMultiState() {
-			return protocol.MakeErrReply("cannot use slave of database within multi")
-		}
-		if len(cmdLine) != 3 {
-			return protocol.MakeArgNumErrReply("SLAVEOF")
-		}
-		return mdb.execSlaveOf(c, cmdLine[1:])
-	}
-
-	// read only slave
-	role := atomic.LoadInt32(&mdb.role)
-	if role == slaveRole &&
-		c.GetRole() != connection.ReplicationRecvCli {
-		// only allow read only command, forbid all special commands except `auth` and `slaveof`
-		if !isReadOnlyCommand(cmdName) {
-			return protocol.MakeErrReply("READONLY You can't write against a read only slave.")
-		}
-	}
 
 	// special commands which cannot execute within transaction
-	if cmdName == "subscribe" {
-		if len(cmdLine) < 2 {
-			return protocol.MakeArgNumErrReply("subscribe")
-		}
-		return pubsub.Subscribe(mdb.hub, c, cmdLine[1:])
-	} else if cmdName == "publish" {
-		return pubsub.Publish(mdb.hub, cmdLine[1:])
-	} else if cmdName == "unsubscribe" {
-		return pubsub.UnSubscribe(mdb.hub, c, cmdLine[1:])
-	} else if cmdName == "bgrewriteaof" {
-		// aof.go imports router.go, router.go cannot import BGRewriteAOF from aof.go
-		return BGRewriteAOF(mdb, cmdLine[1:])
-	} else if cmdName == "rewriteaof" {
-		return RewriteAOF(mdb, cmdLine[1:])
-	} else if cmdName == "flushall" {
-		return mdb.flushAll()
-	} else if cmdName == "flushdb" {
-		if !validateArity(1, cmdLine) {
-			return protocol.MakeArgNumErrReply(cmdName)
-		}
-		if c.InMultiState() {
-			return protocol.MakeErrReply("ERR command 'FlushDB' cannot be used in MULTI")
-		}
-		return mdb.flushDB(c.GetDBIndex())
-	} else if cmdName == "save" {
+	if cmdName == "save" {
 		return SaveRDB(mdb, cmdLine[1:])
 	} else if cmdName == "bgsave" {
 		return BGSaveRDB(mdb, cmdLine[1:])
@@ -179,15 +123,8 @@ func (mdb *MultiDB) Exec(c redis.Connection, cmdLine [][]byte) (result redis.Rep
 	return selectedDB.Exec(c, cmdLine)
 }
 
-// AfterClientClose does some clean after client close connection
-func (mdb *MultiDB) AfterClientClose(c redis.Connection) {
-	pubsub.UnsubscribeAll(mdb.hub, c)
-}
-
 // Close graceful shutdown database
 func (mdb *MultiDB) Close() {
-	// stop replication first
-	mdb.replication.close()
 	if mdb.aofHandler != nil {
 		mdb.aofHandler.Close()
 	}

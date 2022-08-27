@@ -8,20 +8,20 @@ const (
 
 // Element is a key-score pair
 type Element struct {
-	Member string
-	Score  float64
+	Member string  //成员
+	Score  float64 //分值
 }
 
 // Level aspect of a node
 type Level struct {
-	forward *node // forward node has greater score
-	span    int64
+	forward *node // 指向同层的下一个节点
+	span    int64 //到forward到跨度
 }
 
 type node struct {
 	Element
-	backward *node
-	level    []*Level // level[0] is base level
+	backward *node    //后向指针
+	level    []*Level // 前向指针 level[0]是最下层 因为每个节点每一层指向的节点不同 下标表示层数
 }
 
 type skiplist struct {
@@ -52,6 +52,8 @@ func makeSkiplist() *skiplist {
 	}
 }
 
+// randomLevel 随机决定新节点包含的层数
+// 1/2->1 1/4->2 1/8->3 因为跳表每两个节点会选取一个节点作为索引
 func randomLevel() int16 {
 	level := int16(1)
 	for float32(rand.Int31()&0xFFFF) < (0.25 * 0xFFFF) {
@@ -63,32 +65,38 @@ func randomLevel() int16 {
 	return maxLevel
 }
 
+// insert 节点新增
 func (skiplist *skiplist) insert(member string, score float64) *node {
-	update := make([]*node, maxLevel) // link new node with node in `update`
+	// 保存节点的同层先驱节点
+	update := make([]*node, maxLevel)
+	// 保存各层先驱节点的排名 用于计算span
 	rank := make([]int64, maxLevel)
 
-	// find position to insert
 	node := skiplist.header
+	// 层级自上而下寻找 每一层遍历
 	for i := skiplist.level - 1; i >= 0; i-- {
 		if i == skiplist.level-1 {
+			// 最高层作为第0个被寻找
 			rank[i] = 0
 		} else {
 			rank[i] = rank[i+1] // store rank that is crossed to reach the insert position
 		}
+		// 节点存在前向指针
 		if node.level[i] != nil {
-			// traverse the skip list
 			for node.level[i].forward != nil &&
 				(node.level[i].forward.Score < score ||
-					(node.level[i].forward.Score == score && node.level[i].forward.Member < member)) { // same score, different key
+					(node.level[i].forward.Score == score && node.level[i].forward.Member < member)) {
+				// 更新新节点第i层第跨度
 				rank[i] += node.level[i].span
+				// 遍历前向指针节点
 				node = node.level[i].forward
 			}
 		}
 		update[i] = node
 	}
-
+	// 随机选取层数作为新节点的层级
 	level := randomLevel()
-	// extend skiplist level
+	// 如果随机选取节点层级较大 那么超出层级需要更新
 	if level > skiplist.level {
 		for i := skiplist.level; i < level; i++ {
 			rank[i] = 0
@@ -98,7 +106,7 @@ func (skiplist *skiplist) insert(member string, score float64) *node {
 		skiplist.level = level
 	}
 
-	// make node and link into skiplist
+	// 使用层级/分数/成员新建节点
 	node = makeNode(level, score, member)
 	for i := int16(0); i < level; i++ {
 		node.level[i].forward = update[i].level[i].forward
@@ -114,7 +122,7 @@ func (skiplist *skiplist) insert(member string, score float64) *node {
 		update[i].level[i].span++
 	}
 
-	// set backward node
+	// 设置后向节点
 	if update[0] == skiplist.header {
 		node.backward = nil
 	} else {
@@ -130,8 +138,8 @@ func (skiplist *skiplist) insert(member string, score float64) *node {
 }
 
 /*
- * param node: node to delete
- * param update: backward node (of target)
+ * param node: 要删除的节点
+ * param update: 删除节点的前向节点
  */
 func (skiplist *skiplist) removeNode(node *node, update []*node) {
 	for i := int16(0); i < skiplist.level; i++ {
@@ -206,6 +214,7 @@ func (skiplist *skiplist) getRank(member string, score float64) int64 {
 
 /*
  * 1-based rank
+ * zrangebyscore key min max 返回指定分数范围内的成员
  */
 func (skiplist *skiplist) getByRank(rank int64) *node {
 	var i int64 = 0
@@ -241,6 +250,7 @@ func (skiplist *skiplist) hasInRange(min *ScoreBorder, max *ScoreBorder) bool {
 	return true
 }
 
+// getFirstInScoreRange 找到分数范围内的第一个节点
 func (skiplist *skiplist) getFirstInScoreRange(min *ScoreBorder, max *ScoreBorder) *node {
 	if !skiplist.hasInRange(min, max) {
 		return nil
@@ -261,6 +271,8 @@ func (skiplist *skiplist) getFirstInScoreRange(min *ScoreBorder, max *ScoreBorde
 	return n
 }
 
+// getLastInScoreRange 找到分数范围内最后一个节点
+// getLastInScoreRange 找到分数范围内最后一个节点
 func (skiplist *skiplist) getLastInScoreRange(min *ScoreBorder, max *ScoreBorder) *node {
 	if !skiplist.hasInRange(min, max) {
 		return nil
@@ -313,13 +325,13 @@ func (skiplist *skiplist) RemoveRangeByScore(min *ScoreBorder, max *ScoreBorder)
 	return removed
 }
 
-// 1-based rank, including start, exclude stop
+// RemoveRangeByRank 1-based rank, including start, exclude stop
 func (skiplist *skiplist) RemoveRangeByRank(start int64, stop int64) (removed []*Element) {
 	var i int64 = 0 // rank of iterator
 	update := make([]*node, maxLevel)
 	removed = make([]*Element, 0)
 
-	// scan from top level
+	// 自上而下寻找目标[start,stop]的先驱节点
 	node := skiplist.header
 	for level := skiplist.level - 1; level >= 0; level-- {
 		for node.level[level].forward != nil && (i+node.level[level].span) < start {
@@ -332,7 +344,7 @@ func (skiplist *skiplist) RemoveRangeByRank(start int64, stop int64) (removed []
 	i++
 	node = node.level[0].forward // first node in range
 
-	// remove nodes in range
+	// remove nodes in range 可能删除不止一个节点
 	for node != nil && i < stop {
 		next := node.level[0].forward
 		removedElement := node.Element

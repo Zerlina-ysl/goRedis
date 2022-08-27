@@ -1,11 +1,11 @@
 package database
 
 import (
-	List "github.com/hdt3213/godis/datastruct/list"
-	"github.com/hdt3213/godis/interface/database"
-	"github.com/hdt3213/godis/interface/redis"
-	"github.com/hdt3213/godis/lib/utils"
-	"github.com/hdt3213/godis/redis/protocol"
+	List "personalCode/goRedis/datastruct/list"
+	"personalCode/goRedis/interface/database"
+	"personalCode/goRedis/interface/redis"
+	"personalCode/goRedis/lib/utils"
+	"personalCode/goRedis/redis/protocol"
 	"strconv"
 )
 
