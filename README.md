@@ -1,6 +1,6 @@
 # GoRedis
 
-GoRedis 是一个用 Go 语言实现的 简易Redis 服务器。主要参考https://github.com/HDT3213/godis
+GoRedis 是一个用 Go 语言实现的 简易Redis 服务器。
 
 关键功能:
 - 支持 string, list, hash, set, sorted set, bitmap 数据结构
@@ -34,42 +34,7 @@ redis-cli -p 6399
 
 请参考 [commands.md](https://github.com/Zerlina-ysl/goRedis/blob/main/commands.md)
 
-## 性能测试
 
-环境:
-
-Go version：1.16
-
-System: macOS Catalina 10.15.7
-
-CPU: 2.6GHz 6-Core Intel Core i7
-
-Memory: 16 GB 2667 MHz DDR4
-
-redis-benchmark 测试结果:
-
-```
-PING_INLINE: 87260.03 requests per second
-PING_BULK: 89206.06 requests per second
-SET: 85034.02 requests per second
-GET: 87565.68 requests per second
-INCR: 91157.70 requests per second
-LPUSH: 90334.23 requests per second
-RPUSH: 90334.23 requests per second
-LPOP: 90334.23 requests per second
-RPOP: 90415.91 requests per second
-SADD: 90909.09 requests per second
-HSET: 84104.29 requests per second
-SPOP: 82918.74 requests per second
-LRANGE_100 (first 100 elements): 26406.13 requests per second
-LRANGE_300 (first 300 elements): 11307.10 requests per second
-LRANGE_500 (first 450 elements): 7968.13 requests per second
-LRANGE_600 (first 600 elements): 6092.73 requests per second
-MSET (10 keys): 65487.89 requests per second
-```
-
-
-## 如何阅读源码
 
 本项目的目录结构:
 
@@ -101,6 +66,3 @@ MSET (10 keys): 65487.89 requests per second
     - sys.go: Auth 等系统功能实现
     - transaction.go: 单机事务实现
 - aof: AOF 持久化实现 
-
-具体请查看原项目地址：
-https://github.com/HDT3213/godis
